@@ -81,6 +81,7 @@ export default function App() {
       <ProgressBar
         current={currentIndex}
         total={slides.length}
+        slides={slides}
         onDotClick={goTo}
       />
       <Slide
