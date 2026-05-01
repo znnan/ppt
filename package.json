@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "generate-slides": "node scripts/generate-slides.js",
+    "predev": "npm run generate-slides",
     "dev": "vite",
+    "prebuild": "npm run generate-slides",
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build && cp -r dist/* docs/"
