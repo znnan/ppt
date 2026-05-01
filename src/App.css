@@ -201,6 +201,59 @@ body {
 }
 
 /* ============================================
+   Chart Support
+   ============================================ */
+.slide-chart {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.slide-chart-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.slide-chart-columns {
+  gap: 32px;
+}
+
+.slide-chart-columns .slide-body {
+  flex: 0 0 auto;
+  max-width: 45%;
+}
+
+.slide-chart-columns .slide-chart-area {
+  flex: 1;
+  min-width: 280px;
+}
+
+/* Recharts text legibility in dark theme */
+.recharts-text {
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+/* Wider slide when chart is present */
+.slide.slide-columns {
+  max-width: 940px;
+}
+
+@media (max-width: 800px) {
+  .slide-chart-columns {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .slide-chart-columns .slide-body {
+    max-width: 100%;
+  }
+
+  .slide-chart-columns .slide-chart-area {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ============================================
    Title Slide
    ============================================ */
 .slide-title .slide-inner {
@@ -295,6 +348,31 @@ body {
   background: rgba(124, 92, 252, 0.4);
 }
 
+/* Sub-item (second-level bullet) */
+.slide-content-list li.sub-item {
+  font-size: clamp(15px, 1.6vw, 18px);
+  color: rgba(255, 255, 255, 0.62);
+  padding-left: 48px;
+}
+
+.slide-content-list li.sub-item::before {
+  width: 6px;
+  height: 6px;
+  top: 12px;
+  left: 18px;
+  background: rgba(124, 92, 252, 0.25);
+}
+
+/* Spacer between bullet groups */
+.slide-content-list li.spacer {
+  height: 8px;
+  padding: 0;
+}
+
+.slide-content-list li.spacer::before {
+  display: none;
+}
+
 .slide-content-list li strong,
 .slide-content-list li b {
   color: #e8e8e8;
@@ -311,6 +389,11 @@ body {
 
 .slide-center .slide-content-list li::before {
   display: none;
+}
+
+.slide-center .slide-content-list li.sub-item {
+  font-size: clamp(17px, 2vw, 22px);
+  color: rgba(255, 255, 255, 0.38);
 }
 
 .slide-center .slide-title {
@@ -348,6 +431,111 @@ body {
 
 .slide-end .slide-inner {
   text-align: center;
+}
+
+/* ============================================
+   Wide slide (for chart-heavy content)
+   ============================================ */
+.slide.slide-wide {
+  max-width: 1060px;
+}
+
+@media (min-width: 1300px) {
+  .slide.slide-wide {
+    max-width: 1160px;
+  }
+}
+
+/* ============================================
+   Footnotes / Sources
+   ============================================ */
+.slide-footnotes {
+  margin-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.footnote-item {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.28);
+  line-height: 1.5;
+}
+
+.footnote-item sup {
+  color: rgba(255, 255, 255, 0.18);
+}
+
+/* ============================================
+   Chart Caption & Footnotes (inside chart area)
+   ============================================ */
+.chart-caption {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+}
+
+.chart-subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  font-style: italic;
+}
+
+.slide-chart-area .slide-footnotes {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 8px;
+  justify-content: center;
+}
+
+/* ============================================
+   Chart Toggle Hint
+   ============================================ */
+.slide-has-toggle .slide-chart-area {
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.slide-has-toggle .slide-chart-area:focus,
+.slide-has-toggle .slide-chart-area:focus-visible {
+  outline: none;
+}
+
+.chart-toggle-hint {
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.2);
+  transition: color 0.2s;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.slide-chart-area:hover .chart-toggle-hint {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ============================================
+   Wider chart columns
+   ============================================ */
+.slide-chart-columns .slide-chart-area {
+  flex: 1 1 55%;
+  min-width: 380px;
+}
+
+.slide-chart-columns .slide-body {
+  flex: 0 0 auto;
+  max-width: 42%;
 }
 
 /* ============================================

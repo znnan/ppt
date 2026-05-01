@@ -1,10 +1,17 @@
+import { useState } from 'react'
+import SlideChart from './SlideChart'
+
 // Render text with basic HTML markup (<b>, <i>) — content is trusted (hardcoded in slides.jsx)
 function MarkupText({ text }) {
   return <span dangerouslySetInnerHTML={{ __html: text }} />
 }
 
 export default function Slide({ slide, direction }) {
-  const { type, title, subtitle, content, layout = 'left', image } = slide
+  const { type, title, subtitle, content, layout = 'left', image, chart, chartAlt, sources, wider } = slide
+  const [altView, setAltView] = useState(false)
+
+  const activeChart = altView && chartAlt ? chartAlt : chart
+  const canToggle = !!(chart && chartAlt)
 
   const renderContent = () => {
     if (type === 'title') {
@@ -26,20 +33,98 @@ export default function Slide({ slide, direction }) {
     }
 
     if (type === 'content') {
+      const renderItem = (item, i) => {
+        // Sub-item: starts with —— or —
+        const m = item.match(/^(——|—)\s*/)
+        if (m) {
+          const text = item.slice(m[0].length)
+          return <li key={i} className="sub-item"><MarkupText text={text} /></li>
+        }
+        // Spacer line
+        if (item === '') return <li key={i} className="spacer" aria-hidden="true" />
+        return <li key={i}><MarkupText text={item} /></li>
+      }
+
       const body = (
         <div className="slide-body">
           <h2 className="slide-title">{title}</h2>
           {subtitle && <p className="slide-subtitle-secondary">{subtitle}</p>}
           <ul className="slide-content-list">
-            {Array.isArray(content) ? content.filter(Boolean).map((item, i) => (
-              <li key={i}><MarkupText text={item} /></li>
-            )) : (
+            {Array.isArray(content) ? content.map(renderItem) : (
               <li><MarkupText text={content} /></li>
             )}
           </ul>
         </div>
       )
 
+      // Footnotes / sources
+      const footnotes = sources && sources.length > 0 && (
+        <div className="slide-footnotes">
+          {sources.map((s, i) => (
+            <span key={i} className="footnote-item"><sup>{i + 1})</sup> {s}</span>
+          ))}
+        </div>
+      )
+
+      // Chart + text in columns layout
+      // When sources are present, title serves as chart caption below the chart
+      const titleInChart = !!(sources && sources.length > 0)
+
+      if (activeChart && layout === 'columns') {
+        const chartBlock = (
+          <div className="slide-chart-area" onClick={canToggle ? () => setAltView(!altView) : undefined}>
+            <SlideChart config={activeChart} />
+            {titleInChart && <div className="chart-caption">{title}</div>}
+            {titleInChart && subtitle && <div className="chart-subtitle">{subtitle}</div>}
+            {titleInChart && footnotes}
+            {canToggle && (
+              <div className="chart-toggle-hint">
+                {altView ? '点击切回模块视图' : '点击切换：OEM vs 供应商控制权'}
+              </div>
+            )}
+          </div>
+        )
+
+        const textBlock = (
+          <div className="slide-body">
+            {!titleInChart && <h2 className="slide-title">{title}</h2>}
+            {!titleInChart && subtitle && <p className="slide-subtitle-secondary">{subtitle}</p>}
+            <ul className="slide-content-list">
+              {Array.isArray(content) ? content.map(renderItem) : (
+                <li><MarkupText text={content} /></li>
+              )}
+            </ul>
+            {!titleInChart && footnotes}
+          </div>
+        )
+
+        return (
+          <div className="slide-inner slide-columns slide-chart-columns">
+            {chartBlock}
+            {textBlock}
+          </div>
+        )
+      }
+
+      // Chart below text
+      if (activeChart) {
+        return (
+          <div className="slide-inner">
+            {body}
+            <div className="slide-chart-area" onClick={canToggle ? () => setAltView(!altView) : undefined}>
+              <SlideChart config={activeChart} />
+              {canToggle && (
+                <div className="chart-toggle-hint">
+                  {altView ? '点击切回模块视图' : '点击切换：OEM vs 供应商控制权'}
+                </div>
+              )}
+            </div>
+            {footnotes}
+          </div>
+        )
+      }
+
+      // Image + text in columns
       if (image && layout === 'columns') {
         return (
           <div className="slide-inner slide-columns">
@@ -51,6 +136,7 @@ export default function Slide({ slide, direction }) {
         )
       }
 
+      // Image above text
       if (image) {
         return (
           <div className="slide-inner">
@@ -77,8 +163,17 @@ export default function Slide({ slide, direction }) {
     return null
   }
 
+  const slideClass = [
+    'slide',
+    `slide-${type}`,
+    `slide-${layout}`,
+    `slide-${direction}`,
+    wider ? 'slide-wide' : '',
+    canToggle ? 'slide-has-toggle' : '',
+  ].filter(Boolean).join(' ')
+
   return (
-    <div className={`slide slide-${type} slide-${layout} slide-${direction}`}>
+    <div className={slideClass}>
       {renderContent()}
     </div>
   )
