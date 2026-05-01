@@ -1,0 +1,320 @@
+/* ============================================
+   Reset & Base
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans SC', sans-serif;
+  background: #0d0d0d;
+  color: #e8e8e8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   App Container
+   ============================================ */
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================
+   Progress Bar
+   ============================================ */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 100;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4f8cff, #7c5cfc);
+  transition: width 0.4s ease;
+  border-radius: 0 2px 2px 0;
+}
+
+.progress-dots {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  padding: 0;
+}
+
+.progress-dot:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.3);
+}
+
+.progress-dot.active {
+  background: #7c5cfc;
+  transform: scale(1.4);
+}
+
+/* ============================================
+   Navigation Hint
+   ============================================ */
+.nav-hint {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.5px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.55; }
+}
+
+/* ============================================
+   Slide Base
+   ============================================ */
+.slide {
+  width: 100%;
+  max-width: 720px;
+  padding: 40px 32px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-duration: 0.5s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide-in from bottom (next) */
+.slide.slide-next {
+  animation-name: slideInUp;
+}
+
+/* Slide-out to top (prev) */
+.slide.slide-prev {
+  animation-name: slideInDown;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 40px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 40px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ============================================
+   Slide Inner Content
+   ============================================ */
+.slide-inner {
+  width: 100%;
+}
+
+/* ============================================
+   Title Slide
+   ============================================ */
+.slide-title .slide-inner {
+  text-align: center;
+}
+
+.title-main {
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #4f8cff, #a78bfa, #7c5cfc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.slide-subtitle {
+  font-size: clamp(18px, 2.5vw, 26px);
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================
+   Chapter Slide
+   ============================================ */
+.slide-chapter .slide-inner {
+  text-align: center;
+}
+
+.chapter-tag {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #7c5cfc;
+  background: rgba(124, 92, 252, 0.1);
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.slide-chapter .slide-subtitle {
+  font-size: clamp(22px, 3vw, 34px);
+}
+
+/* ============================================
+   Content Slide
+   ============================================ */
+.slide-content .slide-title {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.slide-subtitle-secondary {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 28px;
+  font-style: italic;
+}
+
+.slide-content-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.slide-content-list li {
+  font-size: clamp(15px, 1.6vw, 18px);
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.75);
+  position: relative;
+  padding-left: 24px;
+}
+
+.slide-content-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(124, 92, 252, 0.4);
+}
+
+.slide-content-list li strong {
+  color: #e0e0e0;
+  font-weight: 600;
+}
+
+/* Center layout — no bullets */
+.slide-center .slide-content-list li {
+  text-align: center;
+  padding-left: 0;
+  font-size: clamp(17px, 2vw, 22px);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.slide-center .slide-content-list li::before {
+  display: none;
+}
+
+.slide-center .slide-title {
+  text-align: center;
+}
+
+/* ============================================
+   End Slide
+   ============================================ */
+.title-end {
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #4f8cff, #a78bfa, #7c5cfc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.slide-end .slide-inner {
+  text-align: center;
+}
+
+/* ============================================
+   Responsive Adjustments
+   ============================================ */
+@media (max-width: 600px) {
+  .slide {
+    padding: 32px 24px;
+    max-width: 100%;
+  }
+
+  .slide-content-list li {
+    font-size: 15px;
+    padding-left: 18px;
+  }
+
+  .nav-hint {
+    bottom: 20px;
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .slide {
+    max-width: 780px;
+  }
+}
