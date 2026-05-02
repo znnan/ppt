@@ -6,12 +6,19 @@ function MarkupText({ text }) {
   return <span dangerouslySetInnerHTML={{ __html: text }} />
 }
 
-export default function Slide({ slide, direction }) {
-  const { type, title, subtitle, content, layout = 'left', image, chart, chartAlt, sources, wider } = slide
+export default function Slide({ slide, direction, revealStep = 0 }) {
+  const { type, title, subtitle, content, layout = 'left', image, chart, chartAlt, sources, wider,
+    left, right, centerLine, bottom } = slide
   const [altView, setAltView] = useState(false)
 
   const activeChart = altView && chartAlt ? chartAlt : chart
   const canToggle = !!(chart && chartAlt)
+
+  const handleChartClick = (e) => {
+    if (!canToggle) return
+    e.stopPropagation()
+    setAltView(!altView)
+  }
 
   const renderContent = () => {
     if (type === 'title') {
@@ -33,6 +40,42 @@ export default function Slide({ slide, direction }) {
     }
 
     if (type === 'content') {
+      // ── Comparison layout (左右对比 + 中间类比 + 底部结论) ──
+      if (layout === 'comparison' && left && right) {
+        const hasMoreToReveal = bottom && revealStep < 1
+        return (
+          <div className="slide-inner slide-comparison">
+            <h2 className="slide-title slide-comparison-title">{title}</h2>
+            <div className="comparison-cols">
+              <div className="comparison-col comparison-col-left">
+                <div className="comparison-label">{left.label}</div>
+                <ul className="comparison-items">
+                  {left.items.map((item, i) => <li key={i}>{item}</li>)}
+                </ul>
+              </div>
+              <div className="comparison-divider" />
+              <div className="comparison-col comparison-col-right">
+                <div className="comparison-label">{right.label}</div>
+                <ul className="comparison-items">
+                  {right.items.map((item, i) => <li key={i}>{item}</li>)}
+                </ul>
+              </div>
+            </div>
+            {centerLine && (
+              <div className="comparison-center">{centerLine}</div>
+            )}
+            {bottom && (
+              <div className={`comparison-bottom${revealStep >= 1 ? ' revealed' : ''}`}>
+                {bottom}
+              </div>
+            )}
+            {hasMoreToReveal && (
+              <div className="reveal-hint">点击或按空格揭晓</div>
+            )}
+          </div>
+        )
+      }
+
       const renderItem = (item, i) => {
         // Sub-item: starts with —— or —
         const m = item.match(/^(——|—)\s*/)
@@ -72,7 +115,7 @@ export default function Slide({ slide, direction }) {
 
       if (activeChart && layout === 'columns') {
         const chartBlock = (
-          <div className="slide-chart-area" onClick={canToggle ? () => setAltView(!altView) : undefined}>
+          <div className="slide-chart-area" onClick={handleChartClick}>
             <SlideChart config={activeChart} />
             {titleInChart && <div className="chart-caption">{title}</div>}
             {titleInChart && subtitle && <div className="chart-subtitle">{subtitle}</div>}
@@ -111,7 +154,7 @@ export default function Slide({ slide, direction }) {
         return (
           <div className="slide-inner">
             {body}
-            <div className="slide-chart-area" onClick={canToggle ? () => setAltView(!altView) : undefined}>
+            <div className="slide-chart-area" onClick={handleChartClick}>
               <SlideChart config={activeChart} />
               {canToggle && (
                 <div className="chart-toggle-hint">
