@@ -41,12 +41,123 @@ body {
    ============================================ */
 .app {
   height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
+}
+
+/* ============================================
+   Rotate Overlay (portrait mobile)
+   ============================================ */
+.rotate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0d0d0d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Hide all slide content when overlay is shown */
+body:has(.rotate-overlay) .app > *:not(.rotate-overlay) {
+  visibility: hidden;
+}
+
+.rotate-icon {
+  font-size: 56px;
+  animation: rotateHint 2s ease-in-out infinite;
+}
+
+@keyframes rotateHint {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+}
+
+.rotate-text {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.rotate-sub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   Landscape mobile auto-scale
+   ============================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+  .slide {
+    padding: 20px 32px;
+  }
+
+  .slide-content .slide-title {
+    font-size: clamp(20px, 5vw, 30px);
+    margin-bottom: 8px;
+  }
+
+  .slide-content-list {
+    gap: 10px;
+  }
+
+  .slide-content-list li {
+    font-size: clamp(14px, 2.5vw, 18px);
+    line-height: 1.5;
+  }
+
+  .slide-content-list li.sub-item {
+    font-size: clamp(12px, 2vw, 16px);
+  }
+
+  .comparison-cols {
+    margin-bottom: 20px;
+  }
+
+  .comparison-col {
+    padding: 20px 18px;
+  }
+
+  .comparison-items li {
+    font-size: clamp(14px, 2vw, 18px);
+  }
+
+  .comparison-center {
+    font-size: clamp(14px, 2vw, 18px);
+  }
+
+  .comparison-bottom {
+    font-size: clamp(16px, 2.5vw, 20px);
+  }
+
+  .chapter-tag {
+    font-size: 13px;
+    padding: 6px 16px;
+    margin-bottom: 16px;
+  }
+
+  .slide-chapter .slide-subtitle {
+    font-size: clamp(20px, 4vw, 32px);
+  }
+
+  .progress-chapters {
+    font-size: 9px;
+    top: 16px;
+  }
+
+  .slide-chart-columns .slide-chart-area {
+    min-height: 180px;
+  }
 }
 
 /* ============================================
@@ -174,14 +285,21 @@ body {
 /* ============================================
    Slide Base
    ============================================ */
+.slide-scaler {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.slide-scaler > * {
+  pointer-events: auto;
+}
+
 .slide {
   width: 100%;
-  max-width: 800px;
   padding: 48px 40px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   animation-duration: 0.5s;
   animation-fill-mode: both;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -200,22 +318,22 @@ body {
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translate(-50%, calc(-50% + 40px));
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translateY(0);
   }
 }
 
 @keyframes slideInDown {
   from {
     opacity: 0;
-    transform: translate(-50%, calc(-50% - 40px));
+    transform: translateY(-40px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translateY(0);
   }
 }
 
@@ -367,14 +485,6 @@ body {
   pointer-events: auto;
 }
 
-.reveal-hint {
-  margin-top: 24px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.25);
-  letter-spacing: 0.08em;
-  animation: pulse 2s ease-in-out infinite;
-}
-
 @media (max-width: 800px) {
   .slide.slide-comparison {
     max-width: 100%;
@@ -472,10 +582,18 @@ body {
   max-width: 940px;
 }
 
+.slide-chart {
+  min-height: 160px;
+}
+
+.slide-chart-area {
+  min-height: 160px;
+}
+
 @media (max-width: 800px) {
   .slide-chart-columns {
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
   }
 
   .slide-chart-columns .slide-body {
@@ -485,6 +603,40 @@ body {
   .slide-chart-columns .slide-chart-area {
     min-width: 0;
     width: 100%;
+    min-height: 200px;
+  }
+
+  .slide.slide-wide {
+    max-width: 100%;
+  }
+
+  .chart-toggle-hint {
+    font-size: 10px;
+    top: 2px;
+    right: 8px;
+  }
+}
+
+@media (max-width: 500px) {
+  .slide-chart-columns .slide-chart-area {
+    min-height: 220px;
+  }
+
+  .slide-chart-stacked {
+    min-height: 200px !important;
+  }
+
+  .slide-chart {
+    min-height: 180px;
+  }
+
+  .slide-footnotes {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .chart-caption {
+    font-size: 13px;
   }
 }
 

@@ -42,7 +42,6 @@ export default function Slide({ slide, direction, revealStep = 0 }) {
     if (type === 'content') {
       // ── Comparison layout (左右对比 + 中间类比 + 底部结论) ──
       if (layout === 'comparison' && left && right) {
-        const hasMoreToReveal = bottom && revealStep < 1
         return (
           <div className="slide-inner slide-comparison">
             <h2 className="slide-title slide-comparison-title">{title}</h2>
@@ -68,9 +67,6 @@ export default function Slide({ slide, direction, revealStep = 0 }) {
               <div className={`comparison-bottom${revealStep >= 1 ? ' revealed' : ''}`}>
                 {bottom}
               </div>
-            )}
-            {hasMoreToReveal && (
-              <div className="reveal-hint">点击或按空格揭晓</div>
             )}
           </div>
         )

@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react'
 import {
   ComposedChart,
   BarChart,
@@ -54,10 +55,24 @@ export default function SlideChart({ config }) {
     unit = '',
   } = config
 
+  const containerRef = useRef(null)
+  const [width, setWidth] = useState(600)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => {
+      if (entry?.contentRect?.width) setWidth(entry.contentRect.width)
+    })
+    ro.observe(el)
+    setWidth(el.offsetWidth || 600)
+    return () => ro.disconnect()
+  }, [])
+
   if (!data.length) return null
 
-  // Attach unit to data points for tooltip
   const enrichedData = data.map(d => ({ ...d, unit: d.unit || unit }))
+  const isCompact = width < 500
 
   // ── Stacked bar chart ──
   if (type === 'stacked') {
@@ -66,28 +81,35 @@ export default function SlideChart({ config }) {
       color: b.color || palette.bar[i % palette.bar.length],
     }))
 
+    // Dynamic bar size: on mobile, fit 2 bars with gaps
+    const nBars = enrichedData.length || 2
+    const barW = Math.min(140, Math.max(48, (width - 60) / (nBars * 1.6)))
+
     const makeStackLabel = (label) => (props) => {
-      const { x, y, width, height, value } = props
-      if (height < 22) return null
+      const { x, y, width: w, height: h, value } = props
+      if (h < 18 || (isCompact && h < 28)) return null
+      const fs = isCompact ? 10 : 12
+      const fsVal = isCompact ? 11 : 13
+      const showName = !isCompact || h > 36
       return (
-        <text x={x + width / 2} y={y + height / 2}
+        <text x={x + w / 2} y={y + h / 2}
           textAnchor="middle" dominantBaseline="central"
           fill="rgba(255,255,255,0.92)" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-          <tspan x={x + width / 2} dy={height > 40 ? -4 : -2} fontSize={12} fontWeight={600}>{label}</tspan>
-          <tspan x={x + width / 2} dy={height > 40 ? 16 : 14} fontSize={13} fontWeight={700}>{value}%</tspan>
+          {showName && <tspan x={x + w / 2} dy={h > 40 ? -4 : -2} fontSize={fs} fontWeight={600}>{label}</tspan>}
+          <tspan x={x + w / 2} dy={showName ? (h > 40 ? 16 : 14) : 0} fontSize={fsVal} fontWeight={700}>{value}%</tspan>
         </text>
       )
     }
 
     return (
-      <div className="slide-chart slide-chart-stacked" style={{ height }}>
+      <div className="slide-chart slide-chart-stacked" style={{ height: isCompact ? Math.min(height, 240) : height, minHeight: 180 }} ref={containerRef}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={enrichedData} margin={{ top: 8, right: 32, left: 0, bottom: 0 }}
-            barGap={0} barCategoryGap="35%">
+          <BarChart data={enrichedData} margin={isCompact ? { top: 4, right: 8, left: 0, bottom: 0 } : { top: 8, right: 32, left: 0, bottom: 0 }}
+            barGap={0} barCategoryGap={isCompact ? '25%' : '35%'}>
             <CartesianGrid strokeDasharray="3 3" stroke={palette.grid} vertical={false} />
             <XAxis
               dataKey={xKey}
-              tick={{ fill: palette.axis, fontSize: 14, fontWeight: 600 }}
+              tick={{ fill: palette.axis, fontSize: isCompact ? 11 : 14, fontWeight: 600 }}
               tickLine={false}
               axisLine={{ stroke: palette.grid }}
             />
@@ -101,7 +123,7 @@ export default function SlideChart({ config }) {
                 fill={s.color}
                 stackId="stack"
                 radius={i === segs.length - 1 ? [5, 5, 0, 0] : [0, 0, 0, 0]}
-                barSize={140}
+                barSize={barW}
                 isAnimationActive={false}
               >
                 <LabelList dataKey={s.dataKey} content={makeStackLabel(s.name)} />
@@ -125,35 +147,36 @@ export default function SlideChart({ config }) {
   }))
 
   const renderCombo = () => (
-    <ComposedChart data={enrichedData} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+    <ComposedChart data={enrichedData} margin={isCompact ? { top: 4, right: 4, left: -10, bottom: 0 } : { top: 8, right: 8, left: -10, bottom: 0 }}>
       <CartesianGrid strokeDasharray="3 3" stroke={palette.grid} vertical={false} />
       <XAxis
         dataKey={xKey}
-        tick={{ fill: palette.axis, fontSize: 12 }}
+        tick={{ fill: palette.axis, fontSize: isCompact ? 10 : 12 }}
         tickLine={false}
         axisLine={{ stroke: palette.grid }}
+        interval={isCompact ? 1 : 0}
       />
       <YAxis
         yAxisId="left"
-        tick={{ fill: palette.axis, fontSize: 11 }}
+        tick={{ fill: palette.axis, fontSize: isCompact ? 9 : 11 }}
         tickLine={false}
         axisLine={false}
-        width={40}
+        width={isCompact ? 30 : 40}
       />
       {lineConfigs.length > 0 && (
         <YAxis
           yAxisId="right"
           orientation="right"
-          tick={{ fill: palette.axis, fontSize: 11 }}
+          tick={{ fill: palette.axis, fontSize: isCompact ? 9 : 11 }}
           tickLine={false}
           axisLine={false}
-          width={40}
+          width={isCompact ? 30 : 40}
         />
       )}
       <Tooltip content={<CustomTooltip />} />
       {(barConfigs.length > 0 || lineConfigs.length > 0) && (
         <Legend
-          wrapperStyle={{ fontSize: 12, paddingTop: 10, color: 'rgba(255,255,255,0.6)' }}
+          wrapperStyle={{ fontSize: isCompact ? 10 : 12, paddingTop: 8, color: 'rgba(255,255,255,0.6)' }}
         />
       )}
       {barConfigs.map((b) => (
@@ -164,7 +187,7 @@ export default function SlideChart({ config }) {
           name={b.name}
           fill={b.color}
           radius={[4, 4, 0, 0]}
-          barSize={28}
+          barSize={isCompact ? 18 : 28}
         />
       ))}
       {lineConfigs.map((l) => (
@@ -175,16 +198,16 @@ export default function SlideChart({ config }) {
           dataKey={l.dataKey}
           name={l.name}
           stroke={l.color}
-          strokeWidth={2.5}
-          dot={{ fill: l.color, r: 4, strokeWidth: 0 }}
-          activeDot={{ r: 6, strokeWidth: 0 }}
+          strokeWidth={isCompact ? 2 : 2.5}
+          dot={{ fill: l.color, r: isCompact ? 3 : 4, strokeWidth: 0 }}
+          activeDot={{ r: isCompact ? 4 : 6, strokeWidth: 0 }}
         />
       ))}
     </ComposedChart>
   )
 
   return (
-    <div className="slide-chart" style={{ height }}>
+    <div className="slide-chart" style={{ height: isCompact ? Math.min(height, 220) : height, minHeight: 160 }} ref={containerRef}>
       <ResponsiveContainer width="100%" height="100%">
         {renderCombo()}
       </ResponsiveContainer>
